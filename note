@@ -1,0 +1,44 @@
+1. 브런치의 keyword extraction은 브런치가 글의 내용을 분석해 분류하는 것이 아니라 작가가 직접 해시태그처럼 작성한 키워드 목록을 기준으로 분류하는 것임.
+  div#keywordItemListBlock > a.keyword_elem
+  
+2. Lazyload로 로딩하는 콘텐츠는 XHR 로그에 남는데, 첫 로딩 게시글 40개에 대한 정보는 XHR 로그가 없음.
+3. keyword lazyload 요청 시 parameter에 publishTime값의 다음 산정 기준을 모르겠다.
+  
+2-1. lazyload network specifications
+  General
+    Request URL: https://api.brunch.co.kr/v1/top/keyword/group/39?publishTime=1603763300000&pickContentId=
+    Request Method: GET
+    Referrer Policy: unsafe-url
+  
+  Request Headers
+    Accept: application/json, text/javascript, */*; q=0.01
+    Referer: https://brunch.co.kr/keyword/<키워드>
+    Sec-Fetch-Mode: cors
+  
+  Query String Parameters
+    publishTime: 1603800150000 -> ???? Epoch time in ms. 시간 순 정렬 추정. 그럼 다음 parameter값은 어떻게 알지?
+    pickContentId: -> 항상 빈 값.
+  
+  Response
+    data: {object}
+    desc: "OK"
+  
+      data:
+        articleList: [array]
+        keyword: <키워드>
+        moreList -> 더 이상 로드할 글이 없을 경우에만 false
+      
+          articleList[*]
+            article: {}
+            profile: {}
+            timestamp -> Epoch time in ms
+            
+              article:
+                contentID = userID + no
+                contentHash
+                profileId
+                readSeconds -> ???? 세션에 평균 머무른 시간인가?
+                title
+                viewCount -> 0. 글쓴이 외에는 조회수를 공개 안 하는 건가?
+                likeCount
+              
