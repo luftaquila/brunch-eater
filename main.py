@@ -4,6 +4,7 @@ import sys
 import time
 import json
 import getopt
+import platform
 import datetime
 import requests
 import selenium
@@ -28,9 +29,10 @@ def main(argv):
   MULTIPLE = False # Multiple keyword input switch
   SCAN_NUMBER = None # Maxminum article scan counts
   OUTPUT = None # output file location
+  DRIVER = None # selenium chromedriver location
   
   try:
-    opts, etc_args = getopt.getopt(argv[1:], "k:mn:o:", ["keyword=", "multiple", "number=", "output="])
+    opts, etc_args = getopt.getopt(argv[1:], "k:mn:o:d:", ["keyword=", "multiple", "number=", "output=", "driver="])
   except getopt.GetoptError as e:
     print(Fore.RED + 'fail\n' + str(e))
     sys.exit(1)
@@ -51,6 +53,9 @@ def main(argv):
 
     elif opt in ("-o", "--output"):
       OUTPUT = arg
+      
+    elif opt in ("-d", "--driver"):
+      DRIVER = arg
 
   if len(KEYWORD) < 1:
     print(Fore.RED + '-k or --keyword option is mandatory')
@@ -64,8 +69,15 @@ def main(argv):
   print(Fore.RESET + 'Loading Selenium driver... ', end='')
   sys.stdout.flush()
   try:
-    #driver = webdriver.Chrome(executable_path='chromedriver.exe', options=chrome_options)
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver', options=chrome_options)
+    # Identifying OS
+    OS = platform.system()
+    if OS == 'Linux': chromedriver = 'chromedriver'
+    elif OS == 'Darwin': chromedriver = 'chromedriver'
+    elif OS == 'Windows': chromedriver = 'chromedriver.exe'
+    else: chromedriver = None
+    print(DRIVER if DRIVER else chromedriver)
+      
+    driver = webdriver.Chrome(executable_path=DRIVER if DRIVER else chromedriver, options=chrome_options)
   except selenium.common.exceptions.WebDriverException as e:
     print(Fore.RED + 'fail\n' + str(e))
     sys.exit(1)
