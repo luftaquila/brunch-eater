@@ -44,5 +44,14 @@ Keywords are seperated by comma(,) and wrapped by double-quote("), like `python 
 ##### ChromeDriver
 `-d` or `--driver` [chromedriver location] to specify ChromeDriver executable location.
 * If not specified, brunch-eater will assume it is located in the same directory as `main.py`.  
-See for details.
+See [Install ChromeDriver](https://github.com/luftaquila/brunch-eater#install-chromedriver) for details.
 
+### Usage Examples
+* `python main.py -k IT`  
+Scan all articles about IT, until no articles remaining.
+* `python main.py -k IT -n 100`  
+Only scan most recent 100 articles about IT.
+* `python main.py -m -k "IT, AI"`  
+Scan all articles about IT and AI, until no articles remaining for both keywords.
+* `python main.py -m -k "IT, AI" -n 100`  
+Only scan most recent 100 articles each about IT and AI.
