@@ -149,6 +149,7 @@ def main(argv):
     sys.stdout.flush()
 
   print(Fore.GREEN + 'Scan finished.')
+  driver.quit()
   
 
 def keyword_scan(KEYWORD, SCAN_NUMBER, OUTPUT, driver):
@@ -209,7 +210,12 @@ def keyword_scan(KEYWORD, SCAN_NUMBER, OUTPUT, driver):
         'readSeconds': article['article']['readSeconds'],
         'userId': article['article']['userId'],
         'profileId': article['article']['profileId'],
-        'no': article['article']['no']
+        'no': article['article']['no'],
+        'facebookShareCount': article['article']['facebookShareCount'],
+        'kakaoShareCount': article['article']['kakaoShareCount'],
+        'realtimeArticleSnsShareTotalCount': article['article']['realtimeArticleSnsShareTotalCount'],
+        'socialShareTotalCount': article['article']['socialShareTotalCount'],
+        'twitterShareCount': article['article']['twitterShareCount']
       })
       DATA['count'] = DATA['count'] + 1
       keyword_scan_count = keyword_scan_count + 1
@@ -243,7 +249,12 @@ def scan(KEYWORD, SCAN_NUMBER, timestamp, keyword_scan_count):
       'readSeconds': article['article']['readSeconds'],
       'userId': article['article']['userId'],
       'profileId': article['article']['profileId'],
-      'no': article['article']['no']
+      'no': article['article']['no'],
+      'facebookShareCount': article['article']['facebookShareCount'],
+      'kakaoShareCount': article['article']['kakaoShareCount'],
+      'realtimeArticleSnsShareTotalCount': article['article']['realtimeArticleSnsShareTotalCount'],
+      'socialShareTotalCount': article['article']['socialShareTotalCount'],
+      'twitterShareCount': article['article']['twitterShareCount']
     })
     timestamp = article['timestamp']
     DATA['count'] = DATA['count'] + 1
