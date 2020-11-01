@@ -75,7 +75,6 @@ def main(argv):
     elif OS == 'Darwin': chromedriver = 'chromedriver'
     elif OS == 'Windows': chromedriver = 'chromedriver.exe'
     else: chromedriver = None
-    print(DRIVER if DRIVER else chromedriver)
       
     driver = webdriver.Chrome(executable_path=DRIVER if DRIVER else chromedriver, options=chrome_options)
   except selenium.common.exceptions.WebDriverException as e:
