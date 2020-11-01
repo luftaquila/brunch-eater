@@ -12,6 +12,12 @@ cd brunch-eater/
 ```
 pip install -r requirements.txt
 ```
+Or manually install dependencies by
+```
+pip install requests
+pip install selenium
+pip install colorama
+```
 
 
 ##### Install ChromeDriver
