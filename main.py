@@ -24,6 +24,7 @@ chrome_options.add_argument('--disable-dev-shm-usage')
 DATA = { 'count': 0, 'data': [ ], 'keyword': { } }
 
 def main(argv):
+  init_time = time.time()
   # Parsing options
   KEYWORD = None # single keyword or keyword array
   MULTIPLE = False # Multiple keyword input switch
@@ -137,6 +138,7 @@ def main(argv):
     print(str(article_scan_count) + ' / ' + str(DATA['count']), end='')
     sys.stdout.flush()
     
+    
   print(Fore.RESET + '\nSorting keywords by appearance... ', end='')
   DATA['keyword'] = { k: v for k, v in sorted(DATA['keyword'].items(), key=lambda x: x[1], reverse=True) }
   print(Fore.GREEN + 'OK')
@@ -147,9 +149,13 @@ def main(argv):
     f.write(json.dumps(DATA, ensure_ascii = False))
     print(Fore.GREEN + 'OK')
     sys.stdout.flush()
-
-  print(Fore.GREEN + 'Scan finished.')
+    
   driver.quit()
+  terminate_time = time.time()
+  spent_time = terminate_time - init_time
+  #spent_time = str(datetime.timedelta(seconds=(terminate_time - init_time)))
+  print(Fore.GREEN + 'Scan finished. ' + str(round(spent_time, 1)) + 's spent')
+  
   
 
 def keyword_scan(KEYWORD, SCAN_NUMBER, OUTPUT, driver):
@@ -213,7 +219,6 @@ def keyword_scan(KEYWORD, SCAN_NUMBER, OUTPUT, driver):
         'no': article['article']['no'],
         'facebookShareCount': article['article']['facebookShareCount'],
         'kakaoShareCount': article['article']['kakaoShareCount'],
-        'realtimeArticleSnsShareTotalCount': article['article']['realtimeArticleSnsShareTotalCount'],
         'socialShareTotalCount': article['article']['socialShareTotalCount'],
         'twitterShareCount': article['article']['twitterShareCount']
       })
@@ -222,7 +227,7 @@ def keyword_scan(KEYWORD, SCAN_NUMBER, OUTPUT, driver):
       for i in range(len(str(keyword_scan_count - 1))): print('\b', end='')
       print(keyword_scan_count, end='')
       sys.stdout.flush()
-            
+      
     while True: # lazyloading contents
       timestamp, keyword_scan_count = scan(KEYWORD, SCAN_NUMBER, timestamp, keyword_scan_count)
       if not timestamp: break
@@ -252,7 +257,6 @@ def scan(KEYWORD, SCAN_NUMBER, timestamp, keyword_scan_count):
       'no': article['article']['no'],
       'facebookShareCount': article['article']['facebookShareCount'],
       'kakaoShareCount': article['article']['kakaoShareCount'],
-      'realtimeArticleSnsShareTotalCount': article['article']['realtimeArticleSnsShareTotalCount'],
       'socialShareTotalCount': article['article']['socialShareTotalCount'],
       'twitterShareCount': article['article']['twitterShareCount']
     })
