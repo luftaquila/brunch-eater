@@ -60,3 +60,8 @@
   뒤의 q=g 파라미터는 이 키워드가 키워드 그룹임을 의미한다.
   lazyload시 api.brunch.co.kr/v1/top/keyword/group/39?... 와 같은 식으로 /group/ url이 붙고 39처럼 특정 숫자가 지정된다.
   그냥 키워드일 경우는 api.brunch.co.kr/v1/top/keyword/비즈니스?publishTime=1603204059000&pickContentId= 처럼 해당 키워드가 직접 들어감.
+
+4. Dependency
+requests
+selenium
+colorama

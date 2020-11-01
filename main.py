@@ -128,11 +128,6 @@ def main(argv):
     
   print(Fore.RESET + '\nSorting keywords by appearance... ', end='')
   DATA['keyword'] = { k: v for k, v in sorted(DATA['keyword'].items(), key=lambda x: x[1], reverse=True) }
-  print(DATA['keyword'])
-  sys.stdout.flush()
-  DATA['keyword'] = sorted(DATA['keyword'].items(), key=lambda x: x[1], reverse=True)
-  print(DATA['keyword'])
-  sys.stdout.flush()
   print(Fore.GREEN + 'OK')
   sys.stdout.flush()
     
