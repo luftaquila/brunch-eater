@@ -9,16 +9,16 @@ cd brunch-eater/
 ```
 
 ##### Install python dependencies
+Auto-install dependencies
 ```
 pip install -r requirements.txt
 ```
-Or manually install dependencies by
+Or install dependencies manually
 ```
 pip install requests
 pip install selenium
 pip install colorama
 ```
-
 
 ##### Install ChromeDriver
 1. Visit [HERE](https://chromedriver.chromium.org/downloads) to download the corresponding version of ChromeDriver that matches your installed Chrome version.
