@@ -5,6 +5,7 @@ Crawler and keyword parser of Brunch, Kakao's writing platform.
 ##### Clone repository
 ```
 git clone https://github.com/luftaquila/brunch-eater.git
+cd brunch-eater/
 ```
 
 ##### Install python dependencies
@@ -21,4 +22,27 @@ pip install -r requirements.txt
     
 ### Options
 ##### Keyword
-`-k` `--keyword`
+`-k` or `--keyword` [keyword] to pass keywords to brunch-eater.  
+
+* Single keyword can be passed like `python main.py -k IT`  
+* Multiple keywords should be passed with `-m` or `--multiple` option.  
+Keywords are seperated by comma(,) and wrapped by double-quote("), like `python main.py -m -k "IT,AI"`
+
+##### Scan Counts
+`-n` or `--number` [number] to set count limit of scanning.  
+
+* If not specified, brunch-eater will scan whole articles of passed keyword.
+* ex) `python main.py -k IT -n 100` to scan most recent 100 articles of 'IT' keyword.  
+`python main.py -m -k "IT,AI" -n 100` will scan 100 most recent articles about each keywords.
+
+##### Output file
+`-o` or `--output` [output file] to specify output json file directory and name.
+
+* If not specified, brunch-eater will make `output.json` in the same directory as `main.py`
+* ex) `python main.py -k IT -o /home/user/result.json` will create `result.json` in `/home/user/` as output.
+
+##### ChromeDriver
+`-d` or `--driver` [chromedriver location] to specify ChromeDriver executable location.
+* If not specified, brunch-eater will assume it is located in the same directory as `main.py`.  
+See for details.
+
