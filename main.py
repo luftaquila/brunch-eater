@@ -125,8 +125,10 @@ def main(argv):
       article['keyword'].append(target)
       
       # Update DATA['keyword']
-      if target in DATA['keyword']: DATA['keyword'][target] = DATA['keyword'][target] + 1
-      else: DATA['keyword'][target] = 1
+      if target in DATA['keyword']:
+        DATA['keyword'][target]['count'] = DATA['keyword'][target]['count'] + 1
+        DATA['keyword'][target]['share'] = DATA['keyword'][target]['share'] + article['socialShareTotalCount']
+      else: DATA['keyword'][target] = { "count": 1, "share": article['socialShareTotalCount'] }
         
     # Writing into file
     with open(OUTPUT if OUTPUT else 'output.json', "w") as f:
@@ -139,12 +141,13 @@ def main(argv):
     sys.stdout.flush()
     
     
-  print(Fore.RESET + '\nSorting keywords by appearance... ', end='')
-  DATA['keyword'] = { k: v for k, v in sorted(DATA['keyword'].items(), key=lambda x: x[1], reverse=True) }
-  print(Fore.GREEN + 'OK')
-  sys.stdout.flush()
+  #print(Fore.RESET + '\nSorting keywords by appearance... ', end='')
+  #DATA['keyword'] = { k: v for k, v in sorted(DATA['keyword'].items(), key=lambda x: x[1], reverse=True) }
+  #DATA['keyword'] = { k: v for k, v in sorted(DATA['keyword'].items()[1]['count'], key=lambda x: x, reverse=True) }
+  #print(Fore.GREEN + 'OK')
+  #sys.stdout.flush()
     
-  print(Fore.RESET + 'Performing finial data writing... ', end='')
+  print(Fore.RESET + '\nPerforming final data writing... ', end='')
   with open(OUTPUT if OUTPUT else 'output.json', "w") as f:
     f.write(json.dumps(DATA, ensure_ascii = False))
     print(Fore.GREEN + 'OK')
@@ -184,12 +187,12 @@ def keyword_scan(KEYWORD, SCAN_NUMBER, OUTPUT, driver):
     script = script_content.get_attribute('innerHTML').strip()
     if script[:14] == 'B.Keyword.init':
       script_flag = script
-      
+
   if script_flag:
     print(Fore.GREEN + 'OK')
     print(Fore.RESET + '  Parsing initialization script... ', end='')
     sys.stdout.flush()
-    
+
     try:
       object = script_flag[15:-17]
       timestamp = script_flag[-15:-2]
@@ -197,17 +200,17 @@ def keyword_scan(KEYWORD, SCAN_NUMBER, OUTPUT, driver):
       object = json.loads(object)
       print(Fore.GREEN + 'OK')
       sys.stdout.flush()
-      
+
     except:
       print(Fore.RED + 'fail')
       print(sys.exc_info()[0])
       sys.exit(1)
-    
+
     # Scan list of articles until maximum scan number met
     print(Fore.RESET + '  Parsing JSON object... #', end='')
     print(keyword_scan_count, end='')
     sys.stdout.flush()
-    
+
     # scan first B.Keyword.init lists
     for article in object['articleList']:
       DATA['data'].append({
@@ -227,12 +230,12 @@ def keyword_scan(KEYWORD, SCAN_NUMBER, OUTPUT, driver):
       for i in range(len(str(keyword_scan_count - 1))): print('\b', end='')
       print(keyword_scan_count, end='')
       sys.stdout.flush()
-      
+
     while True: # lazyloading contents
       timestamp, keyword_scan_count = scan(KEYWORD, SCAN_NUMBER, timestamp, keyword_scan_count)
       if not timestamp: break
     print()
-    
+
   else: # Parsing initialization script failed
     print(Fore.RED + 'fail')
     print('Keyword scan failed. KEYWORD: ' + KEYWORD)
