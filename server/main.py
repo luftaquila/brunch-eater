@@ -156,10 +156,18 @@ def main(argv):
     
   print(Fore.RESET + '\nPerforming final data writing... ', end='')
   filename = str(math.floor(time.time())) + ',' + ('$'.join(KEYWORD) if MULTIPLE else KEYWORD) + '.json'
-  with open(OUTPUT if OUTPUT else '../outputs/' + filename, "w") as f:
-    f.write(json.dumps(DATA, ensure_ascii = False))
-    print(Fore.GREEN + 'OK')
-    sys.stdout.flush()
+  
+  try:
+    with open(OUTPUT if OUTPUT else '../outputs/' + filename, "w") as f:
+      f.write(json.dumps(DATA, ensure_ascii = False))
+      print(Fore.GREEN + 'OK')
+      sys.stdout.flush()
+  except FileNotFoundError:
+    os.makedirs(os.path.dirname(OUTPUT) if OUTPUT else '../outputs/')
+    with open(OUTPUT if OUTPUT else '../outputs/' + filename, "w") as f:
+      f.write(json.dumps(DATA, ensure_ascii = False))
+      print(Fore.GREEN + 'OK')
+      sys.stdout.flush()
     
   driver.quit()
   terminate_time = time.time()

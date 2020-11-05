@@ -1,7 +1,7 @@
 $(function() {
-  (function () { var script = document.createElement('script'); script.src="//cdn.jsdelivr.net/npm/eruda"; document.body.appendChild(script); script.onload = function () { eruda.init() } })();
+  //(function () { var script = document.createElement('script'); script.src="//cdn.jsdelivr.net/npm/eruda"; document.body.appendChild(script); script.onload = function () { eruda.init() } })();
   window.onbeforeunload = function (e) { return 0; };
-  $('#keywords').tagsInput({ placeholder: '스캔할 키워드' });
+  $('#keywords').tagsInput({ placeholder: '분석할 키워드' });
   let term = new Terminal({
     convertEol: true,
     fontFamily: `'Fira Mono', monospace`,
@@ -25,7 +25,6 @@ function eventListener(term) {
   let socket = io.connect('https://luftaquila.io', { path: "/brunch-eater/socket" });
   socket.emit('load');
   $('#execute').click(function() {
-    
     if($(this).hasClass('green')) {
       // Verification of inputs
       let keywords = $('#keywords').val(), number = Number($('#number').val());
@@ -81,6 +80,17 @@ function eventListener(term) {
           '</span>' +
         '</li>');
     }
+    $('#filelist').append('' +
+      '<li class="file mdc-list-item mdc-ripple-upgraded" data-name="upload">' + 
+        '<span class="mdc-list-item__text" style="margin: auto 0px">' +
+          '<input type="file" id="uploadfile">' +
+        '</span>' +
+        '<span aria-hidden="true" class="buttonHolder mdc-list-item__meta">' +
+          '<button data-mdc-ripple-is-unbounded="" class="view mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded" title="" style="--mdc-ripple-fg-size:28px; --mdc-ripple-fg-scale:1.71429; --mdc-ripple-left:10px; --mdc-ripple-top:10px;"><i class="far fa-eye"></i></button>' + 
+          '<button disabled data-mdc-ripple-is-unbounded="" class="download mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded" title="" style="--mdc-ripple-fg-size:28px; --mdc-ripple-fg-scale:1.71429; --mdc-ripple-left:10px; --mdc-ripple-top:10px;"><i class="fas fa-download"></i></button>' + 
+          '<button disabled data-mdc-ripple-is-unbounded="" class="trash mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded" title="" style="--mdc-ripple-fg-size:28px; --mdc-ripple-fg-scale:1.71429; --mdc-ripple-left:10px; --mdc-ripple-top:10px;"><i class="far fa-trash-alt"></i></button>' + 
+        '</span>' +
+      '</li>');
   });
   
   $('#filelist').on('click', '.download', function() {
@@ -108,14 +118,22 @@ function eventListener(term) {
   
   $('#filelist').on('click', '.view', function() {
     let filename = $(this).closest('li').attr('data-name');
-    $.ajax({
-      url: 'outputs/' + filename,
-      type: 'GET',
-      dataType: 'json',
-      success: function(res) {
-        Swal.fire('D3 Visualizer', '', 'success');
+    if(filename == 'upload') {
+      if(document.getElementById('uploadfile').files.length) {
+        Swal.fire('D3 Visualizer', 'for uploaded file', 'success');
       }
-    });
+      else Swal.fire('파일이 없습니다.', '', 'error');
+    }
+    else {
+      $.ajax({
+        url: 'outputs/' + filename,
+        type: 'GET',
+        dataType: 'json',
+        success: function(res) {
+          Swal.fire('D3 Visualizer', '', 'success');
+        }
+      });
+    }
   });
 }
 
