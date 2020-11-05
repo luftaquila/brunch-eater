@@ -1,1 +1,2 @@
-output.json
+server/node_modules
+outputs/

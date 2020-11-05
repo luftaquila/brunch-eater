@@ -1,0 +1,27 @@
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+body {
+  font-family: "Montserrat", sans-serif!important;
+}
+
+@media (max-width:760px) {
+  .container {
+    width: 100%;
+  }
+}
+@media (min-width:760px) {
+.container {
+    width: 30rem;
+  }
+}
+
+.xterm-viewport { overflow: hidden !important; }
+
+.file {
+  width: 100%;
+  height: 3rem;
+  

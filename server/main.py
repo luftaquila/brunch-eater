@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import math
 import time
 import json
 import getopt
@@ -36,6 +37,7 @@ def main(argv):
     opts, etc_args = getopt.getopt(argv[1:], "k:mn:o:d:", ["keyword=", "multiple", "number=", "output=", "driver="])
   except getopt.GetoptError as e:
     print(Fore.RED + 'fail\n' + str(e))
+    print(Fore.RESET)
     sys.exit(1)
     
   for opt, arg in opts:
@@ -50,6 +52,7 @@ def main(argv):
         SCAN_NUMBER = int(arg)
       except ValueError as e:
         print(Fore.RED + '-n or --number option parameter must be integer number')
+        print(Fore.RESET)
         sys.exit(1)
 
     elif opt in ("-o", "--output"):
@@ -60,6 +63,7 @@ def main(argv):
 
   if len(KEYWORD) < 1:
     print(Fore.RED + '-k or --keyword option is mandatory')
+    print(Fore.RESET)
     sys.exit(1)
     
   if MULTIPLE:
@@ -80,15 +84,16 @@ def main(argv):
     driver = webdriver.Chrome(executable_path=DRIVER if DRIVER else chromedriver, options=chrome_options)
   except selenium.common.exceptions.WebDriverException as e:
     print(Fore.RED + 'fail\n' + str(e))
+    print(Fore.RESET)
     sys.exit(1)
   print(Fore.GREEN + 'OK')
   sys.stdout.flush()
   
-  
+  '''
   # Initializing output file
   with open(OUTPUT if OUTPUT else 'output.json', "w") as f:
     f.write(json.dumps(DATA, ensure_ascii = False))
-    
+  '''
   
   # Starting keywords scan
   if isinstance(KEYWORD, str): # if KEYWORD is a single string
@@ -107,12 +112,12 @@ def main(argv):
     article['keyword'] = [ ]
     # Loading target article
     try:
-      #print('https://brunch.co.kr/@' + str(article['profileId']) + '/' + str(article['no']))
       driver.get('https://brunch.co.kr/@' + str(article['profileId']) + '/' + str(article['no']))
-      WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'h1.cover_title')))
-    except selenium.common.exceptions.TimeoutException as e: 
-      print(Fore.RED + '\nFAIL:' + str(e))
-      sys.exit(1)
+      WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'h1.cover_title')))
+    except selenium.common.exceptions.TimeoutException as e:
+      #print(Fore.RED + '\nFAIL:', e)
+      #print(Fore.RESET)
+      continue # skip failed request
       
     # Do some analysis on article
     
@@ -130,9 +135,11 @@ def main(argv):
         DATA['keyword'][target]['share'] = DATA['keyword'][target]['share'] + article['socialShareTotalCount']
       else: DATA['keyword'][target] = { "count": 1, "share": article['socialShareTotalCount'] }
         
+    '''
     # Writing into file
     with open(OUTPUT if OUTPUT else 'output.json', "w") as f:
       f.write(json.dumps(DATA, ensure_ascii = False))
+    '''
 
     # Updating counter
     article_scan_count = article_scan_count + 1
@@ -148,7 +155,8 @@ def main(argv):
   #sys.stdout.flush()
     
   print(Fore.RESET + '\nPerforming final data writing... ', end='')
-  with open(OUTPUT if OUTPUT else 'output.json', "w") as f:
+  filename = str(math.floor(time.time())) + ',' + ('$'.join(KEYWORD) if MULTIPLE else KEYWORD) + '.json'
+  with open(OUTPUT if OUTPUT else '../outputs/' + filename, "w") as f:
     f.write(json.dumps(DATA, ensure_ascii = False))
     print(Fore.GREEN + 'OK')
     sys.stdout.flush()
@@ -157,7 +165,10 @@ def main(argv):
   terminate_time = time.time()
   spent_time = terminate_time - init_time
   #spent_time = str(datetime.timedelta(seconds=(terminate_time - init_time)))
-  print(Fore.GREEN + 'Scan finished. ' + str(round(spent_time, 1)) + 's spent')
+  print(Fore.GREEN + 'Scan finished. ' + str(round(spent_time, 1)) + 's spent.')
+  print(Fore.RESET + 'OUTPUT: ' + filename)
+  print(Fore.RESET)
+  sys.stdout.flush()
   
   
 
@@ -175,6 +186,7 @@ def keyword_scan(KEYWORD, SCAN_NUMBER, OUTPUT, driver):
     WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'ul.list_article.list_common')))
   except selenium.common.exceptions.TimeoutException as e: 
     print(Fore.RED + 'fail\n' + str(e))
+    print(Fore.RESET)
     sys.exit(1)
   print(Fore.GREEN + 'OK')
   sys.stdout.flush()
@@ -204,6 +216,7 @@ def keyword_scan(KEYWORD, SCAN_NUMBER, OUTPUT, driver):
     except:
       print(Fore.RED + 'fail')
       print(sys.exc_info()[0])
+      print(Fore.RESET)
       sys.exit(1)
 
     # Scan list of articles until maximum scan number met
@@ -220,10 +233,8 @@ def keyword_scan(KEYWORD, SCAN_NUMBER, OUTPUT, driver):
         'userId': article['article']['userId'],
         'profileId': article['article']['profileId'],
         'no': article['article']['no'],
-        'facebookShareCount': article['article']['facebookShareCount'],
-        'kakaoShareCount': article['article']['kakaoShareCount'],
         'socialShareTotalCount': article['article']['socialShareTotalCount'],
-        'twitterShareCount': article['article']['twitterShareCount']
+        'url': 'https://brunch.co.kr/@' + str(article['article']['profileId']) + '/' + str(article['article']['no'])
       })
       DATA['count'] = DATA['count'] + 1
       keyword_scan_count = keyword_scan_count + 1
@@ -258,10 +269,8 @@ def scan(KEYWORD, SCAN_NUMBER, timestamp, keyword_scan_count):
       'userId': article['article']['userId'],
       'profileId': article['article']['profileId'],
       'no': article['article']['no'],
-      'facebookShareCount': article['article']['facebookShareCount'],
-      'kakaoShareCount': article['article']['kakaoShareCount'],
       'socialShareTotalCount': article['article']['socialShareTotalCount'],
-      'twitterShareCount': article['article']['twitterShareCount']
+      'url': 'https://brunch.co.kr/@' + str(article['article']['profileId']) + '/' + str(article['article']['no'])
     })
     timestamp = article['timestamp']
     DATA['count'] = DATA['count'] + 1
