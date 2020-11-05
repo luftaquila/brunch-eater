@@ -1,5 +1,5 @@
 $(function() {
-  //(function () { var script = document.createElement('script'); script.src="//cdn.jsdelivr.net/npm/eruda"; document.body.appendChild(script); script.onload = function () { eruda.init() } })();
+  (function () { var script = document.createElement('script'); script.src="//cdn.jsdelivr.net/npm/eruda"; document.body.appendChild(script); script.onload = function () { eruda.init() } })();
   window.onbeforeunload = function (e) { return 0; };
   $('#keywords').tagsInput({ placeholder: '스캔할 키워드' });
   let term = new Terminal({
@@ -48,7 +48,6 @@ function eventListener(term) {
       
       socket.emit('execute', { data: payload });
       term.writeln(payload.command + ' ' +  payload.file + ' -k "' + payload.keyword + '" ' + payload.option);
-      
     }
     else {
       $(this).removeClass('red').addClass('green').text('Run!');
@@ -61,7 +60,6 @@ function eventListener(term) {
   socket.on('filelist', function(data) {
     $('#filelist').html('');
     for(let file of data.children.reverse()) {
-      console.log(file.name.split(',', 2))
       $('#filelist').append('' +
         '<li class="file mdc-list-item mdc-ripple-upgraded" data-name="' + file.name + '">' + 
           '<span class="mdc-list-item__text">' +
@@ -72,23 +70,24 @@ function eventListener(term) {
               new Date(file.name.split(',', 2)[0] * 1000).format('yyyy-mm-dd TT h:MM:ss') + 
             '</span>' +  
           '</span>' +
-          '<span aria-hidden="true" class="mdc-list-item__meta">' +
-            '<button data-mdc-ripple-is-unbounded="" class="mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded" title="" style="--mdc-ripple-fg-size:28px; --mdc-ripple-fg-scale:1.71429; --mdc-ripple-left:10px; --mdc-ripple-top:10px;"><i class="far fa-eye"></i></button>' + 
-            '<button data-mdc-ripple-is-unbounded="" class="mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded" title="" style="--mdc-ripple-fg-size:28px; --mdc-ripple-fg-scale:1.71429; --mdc-ripple-left:10px; --mdc-ripple-top:10px;"><i class="fas fa-download"></i></button>' + 
-            '<button data-mdc-ripple-is-unbounded="" class="mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded" title="" style="--mdc-ripple-fg-size:28px; --mdc-ripple-fg-scale:1.71429; --mdc-ripple-left:10px; --mdc-ripple-top:10px;"><i class="far fa-trash-alt"></i></button>' + 
+          '<span aria-hidden="true" class="buttonHolder mdc-list-item__meta">' +
+            '<button data-mdc-ripple-is-unbounded="" class="view mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded" title="" style="--mdc-ripple-fg-size:28px; --mdc-ripple-fg-scale:1.71429; --mdc-ripple-left:10px; --mdc-ripple-top:10px;"><i class="far fa-eye"></i></button>' + 
+            '<button data-mdc-ripple-is-unbounded="" class="download mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded" title="" style="--mdc-ripple-fg-size:28px; --mdc-ripple-fg-scale:1.71429; --mdc-ripple-left:10px; --mdc-ripple-top:10px;"><i class="fas fa-download"></i></button>' + 
+            '<button data-mdc-ripple-is-unbounded="" class="trash mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded" title="" style="--mdc-ripple-fg-size:28px; --mdc-ripple-fg-scale:1.71429; --mdc-ripple-left:10px; --mdc-ripple-top:10px;"><i class="far fa-trash-alt"></i></button>' + 
           '</span>' +
         '</li>');
     }
   });
-  $('ul#filelist').delegate('li','click',function() {
-    let filename = $(this).attr('data-name')
+  
+  $('#filelist').on('click', '.download', function() {
+    let filename = $(this).closest('li').attr('data-name');
     $.ajax({
       url: 'outputs/' + filename,
       type: 'GET',
       dataType: 'json',
       success: function(res) {
-        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(res));
-        var downloadAnchorNode = document.createElement('a');
+        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(res));
+        let downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);
         downloadAnchorNode.setAttribute("download", filename);
         document.body.appendChild(downloadAnchorNode); // required for firefox
@@ -97,10 +96,27 @@ function eventListener(term) {
       }
     });
   });
+  
+  $('#filelist').on('click', '.trash', function() {
+    let filename = $(this).closest('li').attr('data-name');
+    socket.emit('delete', filename);
+  });
+  
+  $('#filelist').on('click', '.view', function() {
+    let filename = $(this).closest('li').attr('data-name');
+    $.ajax({
+      url: 'outputs/' + filename,
+      type: 'GET',
+      dataType: 'json',
+      success: function(res) {
+        Swal.fire('D3 Visualizer', '', 'success');
+      }
+    });
+  });
 }
 
 var dateFormat = function () {
-  var	token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g,
+  var token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g,
     timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,
     timezoneClip = /[^-+\dA-Z]/g,
     pad = function (val, len) {

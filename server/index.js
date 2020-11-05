@@ -1,3 +1,4 @@
+const fs = require('fs');
 const io = require('socket.io')(3151);
 const dirTree = require("directory-tree");
 const spawn = require("child_process").spawn;
@@ -16,6 +17,11 @@ io.sockets.on('connection', function (socket) {
     catch(e) { }
   });
   socket.on('load', function() {
+    const tree = dirTree('../outputs/');
+    io.to(socket.id).emit('filelist', tree);
+  });
+  socket.on('delete', (data) => {
+    fs.unlink('../outputs/' + data, (err) => { });
     const tree = dirTree('../outputs/');
     io.to(socket.id).emit('filelist', tree);
   });
