@@ -27,13 +27,13 @@ function eventListener(term) {
   $('#execute').click(function() {
     
     if($(this).hasClass('green')) {
-      $(this).removeClass('green').addClass('red').text('Stop!');
-       
       // Verification of inputs
       let keywords = $('#keywords').val(), number = Number($('#number').val());
       if(!keywords.length) return Swal.fire('키워드를 입력하세요.', '', 'error');
       if(number < 0 || !Number.isInteger(number)) return Swal.fire('유효한 숫자가 아닙니다.', '' , 'error');
       
+      $(this).removeClass('green').addClass('red').text('Stop!');
+       
       // Write python command
       let option = '';
       if(keywords.split(',').length > 1) option += ' -m';
@@ -56,7 +56,11 @@ function eventListener(term) {
     }
   });
   socket.on('progress', function(data) { term.write(data); });
-  socket.on('SIGTERM', function(data) { term.write('$ '); socket.emit('load'); });
+  socket.on('SIGTERM', function(data) {
+    $('#execute').removeClass('red').addClass('green').text('Run!');
+    term.write('$ ');
+    socket.emit('load');
+  });
   socket.on('filelist', function(data) {
     $('#filelist').html('');
     for(let file of data.children.reverse()) {
