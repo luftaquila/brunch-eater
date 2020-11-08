@@ -10,6 +10,8 @@ import datetime
 import requests
 import selenium
 import threading
+import pandas as pd
+from konlpy.tag import Hannanum
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -18,6 +20,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from colorama import init, Fore, Back, Style
 
+hannanum = Hannanum()
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument('--headless')
 chrome_options.add_argument('--no-sandbox')
@@ -108,9 +111,11 @@ def main(argv):
   print(Fore.RESET + 'Scanning collected articles... #0 / ' + str(DATA['count']), end='')
   article_scan_count = 0
   
+  # For each articles
   for article in DATA['data']:
     article['keyword'] = [ ]
     # Loading target article
+
     try:
       driver.get('https://brunch.co.kr/@' + str(article['profileId']) + '/' + str(article['no']))
       WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'h1.cover_title')))
@@ -118,9 +123,16 @@ def main(argv):
       #print(Fore.RED + '\nFAIL:', e)
       #print(Fore.RESET)
       continue # skip failed request
-      
-    # Do some analysis on article
     
+    # Do some analysis on article
+    articleText = ''
+    contents = driver.find_element(By.CSS_SELECTOR, 'div.wrap_body').find_elements(By.TAG_NAME, 'p')
+    for content in contents: articleText += content.get_attribute('innerText')
+    articleText = re.sub('[0-9]+', '', articleText) # Removing numbers
+    articleText = re.sub(u'\xa0', u' ', articleText) # Removing \xa0, which is &nbsp;
+    articleText = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ·!』\\‘’|\(\)\[\]\<\>`\'…》]', '', articleText) # Removing special characters
+    article['word'] = pd.Series(hannanum.nouns(articleText)).value_counts().to_dict() # 형태소 추출 및 출현 빈도수 합산
+
     # Analysis on keywords list
     keywords = driver.find_element(By.CSS_SELECTOR, 'ul.list_keyword').find_elements(By.TAG_NAME, 'li')
     for keyword in keywords:
@@ -128,15 +140,14 @@ def main(argv):
       
       # Update each data's keyword list
       article['keyword'].append(target)
-      
+
       # Update DATA['keyword']
       if target in DATA['keyword']:
         DATA['keyword'][target]['count'] = DATA['keyword'][target]['count'] + 1
         DATA['keyword'][target]['share'] = DATA['keyword'][target]['share'] + article['socialShareTotalCount']
       else: DATA['keyword'][target] = { "count": 1, "share": article['socialShareTotalCount'] }
-        
     '''
-    # Writing into file
+    # Writing into file after each article scan is finished.
     with open(OUTPUT if OUTPUT else 'output.json', "w") as f:
       f.write(json.dumps(DATA, ensure_ascii = False))
     '''
@@ -146,25 +157,20 @@ def main(argv):
     for i in range(len(str(article_scan_count - 1)) + 3 + len(str(DATA['count']))): print('\b', end='')
     print(str(article_scan_count) + ' / ' + str(DATA['count']), end='')
     sys.stdout.flush()
-    
-    
-  #print(Fore.RESET + '\nSorting keywords by appearance... ', end='')
-  #DATA['keyword'] = { k: v for k, v in sorted(DATA['keyword'].items(), key=lambda x: x[1], reverse=True) }
-  #DATA['keyword'] = { k: v for k, v in sorted(DATA['keyword'].items()[1]['count'], key=lambda x: x, reverse=True) }
-  #print(Fore.GREEN + 'OK')
-  #sys.stdout.flush()
-    
+
+
+  # Writing into file
   print(Fore.RESET + '\nPerforming final data writing... ', end='')
   filename = str(math.floor(time.time())) + ',' + ('$'.join(KEYWORD) if MULTIPLE else KEYWORD) + '.json'
   
   try:
-    with open(OUTPUT if OUTPUT else '../outputs/' + filename, "w") as f:
+    with open(OUTPUT if OUTPUT else filename, "w", -1, 'utf-8') as f:
       f.write(json.dumps(DATA, ensure_ascii = False))
       print(Fore.GREEN + 'OK')
       sys.stdout.flush()
-  except FileNotFoundError:
-    os.makedirs(os.path.dirname(OUTPUT) if OUTPUT else '../outputs/')
-    with open(OUTPUT if OUTPUT else '../outputs/' + filename, "w") as f:
+  except FileNotFoundError: # If there is no route to output folder
+    os.makedirs(os.path.dirname(OUTPUT) if OUTPUT else '')
+    with open(OUTPUT if OUTPUT else filename, "w", -1, 'utf-8') as f:
       f.write(json.dumps(DATA, ensure_ascii = False))
       print(Fore.GREEN + 'OK')
       sys.stdout.flush()
@@ -242,7 +248,14 @@ def keyword_scan(KEYWORD, SCAN_NUMBER, OUTPUT, driver):
         'profileId': article['article']['profileId'],
         'no': article['article']['no'],
         'socialShareTotalCount': article['article']['socialShareTotalCount'],
-        'url': 'https://brunch.co.kr/@' + str(article['article']['profileId']) + '/' + str(article['article']['no'])
+        'url': 'https://brunch.co.kr/@' + str(article['article']['profileId']) + '/' + str(article['article']['no']),
+        'authorComment': article['article']['authorComment'],
+        'contentSummary': article['article']['contentSummary'],
+        'subTitle': article['article']['subTitle'],
+        'userName': article['profile']['userName'],
+        'articleCount': article['profile']['articleCount'],
+        'followerCount': article['profile']['followerCount'],
+        'description': article['profile']['description']
       })
       DATA['count'] = DATA['count'] + 1
       keyword_scan_count = keyword_scan_count + 1
@@ -278,7 +291,14 @@ def scan(KEYWORD, SCAN_NUMBER, timestamp, keyword_scan_count):
       'profileId': article['article']['profileId'],
       'no': article['article']['no'],
       'socialShareTotalCount': article['article']['socialShareTotalCount'],
-      'url': 'https://brunch.co.kr/@' + str(article['article']['profileId']) + '/' + str(article['article']['no'])
+      'url': 'https://brunch.co.kr/@' + str(article['article']['profileId']) + '/' + str(article['article']['no']),
+      'authorComment': article['article']['authorComment'],
+      'contentSummary': article['article']['contentSummary'],
+      'subTitle': article['article']['subTitle'],
+      'userName': article['profile']['userName'],
+      'articleCount': article['profile']['articleCount'],
+      'followerCount': article['profile']['followerCount'],
+      'description': article['profile']['description']
     })
     timestamp = article['timestamp']
     DATA['count'] = DATA['count'] + 1

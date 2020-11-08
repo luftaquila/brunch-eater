@@ -83,7 +83,7 @@ function eventListener(term) {
     $('#filelist').append('' +
       '<li class="file mdc-list-item mdc-ripple-upgraded" data-name="upload">' + 
         '<span class="mdc-list-item__text" style="margin: auto 0px">' +
-          '<input type="file" id="uploadfile">' +
+          '<input type="file" id="uploadfile" style="width: 90%">' +
         '</span>' +
         '<span aria-hidden="true" class="buttonHolder mdc-list-item__meta">' +
           '<button data-mdc-ripple-is-unbounded="" class="view mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded" title="" style="--mdc-ripple-fg-size:28px; --mdc-ripple-fg-scale:1.71429; --mdc-ripple-left:10px; --mdc-ripple-top:10px;"><i class="far fa-eye"></i></button>' + 
